@@ -6,12 +6,12 @@ const { uniqueNamesGenerator, adjectives, colors } = require('unique-names-gener
 const auctionResolver = {
     Query: {
         auctions: async() => {
-            const auctions = await Auction.find().populate(['users', 'owner'])
+            const auctions = await Auction.find()
             return auctions
         },
 
         auction: async(_, args) => {
-            const auction = await Auction.find({ _id: args.auctionId }).populate(['users', 'owner'])
+            const auction = await Auction.findOne({ name: args.auctionName })
             return auction
         }
     },
@@ -20,23 +20,20 @@ const auctionResolver = {
         createAuction: async(_, args) => {
             try {
                 const auctionName = uniqueNamesGenerator({ dictionaries: [adjectives, colors] });
-                const newUser = new User({
-                    name: args.userName,
-                    ready: true,
-                    auction: auctionName
-                })
-
-                const owner = await newUser.save()
+                const user = await User.findOne({ _id: args.userId })
+                if(!user) throw new Error('Utente non trovato.')
 
                 const newAuction = new Auction({
                     name: auctionName,
                     status: 'pending',
-                    owner
+                    owner: user
                 })
-                
-                newAuction.users.push(owner)
 
+                newAuction.users.push(user)
                 const savedAuction = await newAuction.save()
+
+                user.auctions.push(savedAuction)
+                await user.save()
 
                 return savedAuction
 
@@ -55,13 +52,34 @@ const auctionResolver = {
             } catch(err) {
                 throw err
             }
+        },
+
+        updateAuctionUserTurn: async(_, args, { pubsub }) => {
+            try {
+                const auction = await Auction.findOne({ _id: args.auctionId })
+                const user = await User.findOne({ _id: args.userId })
+                auction.turnOf = user
+                await auction.save()
+                pubsub.publish(`auction_${auction.name}`, { auction })
+                return auction
+
+            } catch(err) {
+                throw err
+            }
+        },
+
+        deleteAuctions: async() => {
+            await Auction.deleteMany()
+            return 'deleted all auctions'
         }
     },
 
     Subscription: {
         auction: {
-            subscribe: async(_, args, { pubsub }) =>  {
-            return pubsub.asyncIterator(`auction_${args.auction}`)
+            subscribe: async(_, args, { pubsub }) => {
+                const auction = await Auction.findOne({ name: args.auction })
+                setTimeout(() => pubsub.publish(`auction_${args.auction}`, { auction }), 0)
+                return pubsub.asyncIterator(`auction_${args.auction}`)
             }
         }
     }

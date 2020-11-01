@@ -4,6 +4,7 @@ module.exports = `
         name: String!
         status: String!
         owner: User
+        turnOf: User
         users: [User]
     }
 
@@ -13,11 +14,13 @@ module.exports = `
     
     extend type Query {
         auctions: [Auction]
-        auction(auctionId: ID!): Auction
+        auction(auctionName: String!): Auction
     }
 
     extend type Mutation {
-        createAuction(userName: String!): Auction
+        createAuction(userId: ID!): Auction
         updateAuctionStatus(auctionId: ID!, newStatus: String!): Auction
+        updateAuctionUserTurn(auctionId: ID!, userId: ID!): Auction
+        deleteAuctions: String
     }
 `
