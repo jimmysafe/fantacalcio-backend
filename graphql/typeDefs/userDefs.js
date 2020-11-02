@@ -31,8 +31,8 @@ module.exports = `
     extend type Mutation {
         createUser(input: RegisterUserInput!): User
         loginUser(email: String!, password: String!): AuthData
-        associateUserToAuction(userId: ID!, inviteCode: String!): User
-        changeUserReadiness(userId: ID!) : User
+        associateUserToAuction(userId: ID!, inviteCode: String!): Auction
+        changeUserReadiness(userId: ID!, auctionName: String!) : User
         deleteAllUsers: String
     }
 `

@@ -17,13 +17,11 @@ const UserSchema = new Schema({
     },
     auctions: [{
         type: Schema.Types.ObjectId,
-        ref: 'auction',
-        autopopulate: true
+        ref: 'auction'
     }],
     ready: Boolean
 })
 
-UserSchema.plugin(require('mongoose-autopopulate'));
 
 const User = mongoose.model('user', UserSchema)
 

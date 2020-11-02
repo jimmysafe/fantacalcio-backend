@@ -7,12 +7,12 @@ const Auction = require('../../schema/Auction')
 const userResolver = {
     Query: {
       users: async() => {
-        const users = await User.find()
+        const users = await User.find().populate('auctions')
         return users
       },
 
       auctionUsers: async(_, args) => {
-        const users = await User.find({ auction: args.auction })
+        const users = await User.find({ auction: args.auction }).populate('auctions')
         return users
       }
     },
@@ -67,10 +67,10 @@ const userResolver = {
 
       associateUserToAuction: async(_, args, { pubsub }) => {
         try {
-          const auction = await Auction.findOne({ name: args.inviteCode })
+          const auction = await Auction.findOne({ name: args.inviteCode }).populate(['owner', 'users', 'turnOf'])
           if(!auction) throw new Error('Asta non trovata.')
 
-          const user = await User.findOne({ _id: args.userId })
+          const user = await User.findOne({ _id: args.userId }).populate('auctions')
           if(!user) throw new Error('Utente non trovato.')
           
           user.ready = false
@@ -82,7 +82,7 @@ const userResolver = {
 
           pubsub.publish(`users_${auction.name}`, { auctionUsers: auction.users })
 
-          return user
+          return auction
 
         } catch(err) {
           throw err
@@ -91,15 +91,20 @@ const userResolver = {
 
       changeUserReadiness: async(_, args, { pubsub }) => {
         try {
-          const user = await User.findOne({ _id: args.userId })          
+          const auction = await Auction.findOne({ name: args.auctionName }).populate(['users'])
+          const user = await User.findOne({ _id: args.userId })
+          
+          const userIndex = auction.users.findIndex(x => x._id !== user._id)
+
           user.ready = !user.ready
-          await user.save()
+          const savedUser = await user.save()
 
-          const allUsers = await User.find({ auction: user.auction })
+          auction.users[userIndex].ready = savedUser.ready
+          await auction.save()
 
-          pubsub.publish(`users_${user.auction}`, { auctionUsers: allUsers })
-
-          return user
+          pubsub.publish(`users_${auction.name}`, { auctionUsers: auction.users })
+          
+          return savedUser
 
         } catch(err) {
           throw err
@@ -115,7 +120,7 @@ const userResolver = {
     Subscription: {
       auctionUsers: {
         subscribe: async(_, args, { pubsub }) =>  {
-          const auction = await Auction.findOne({ name: args.auction }).populate(['owner', 'users'])
+          const auction = await Auction.findOne({ name: args.auction }).populate(['users'])
           setTimeout(() => pubsub.publish(`users_${args.auction}`, { auctionUsers: auction.users }), 0)
           return pubsub.asyncIterator(`users_${args.auction}`)
         }

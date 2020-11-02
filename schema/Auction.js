@@ -13,23 +13,19 @@ const AuctionSchema = new Schema({
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: 'user',
-        autopopulate: true
+        ref: 'user'
     },
     users: [{
         type: Schema.Types.ObjectId,
-        ref: 'user',
-        autopopulate: true
+        ref: 'user'
     }],
     turnOf: {
         type: Schema.Types.ObjectId,
-        ref: 'user',
-        autopopulate: true
+        ref: 'user'    
     }
 
 })
 
-AuctionSchema.plugin(require('mongoose-autopopulate'));
 
 const Auction = mongoose.model('auction', AuctionSchema)
 
