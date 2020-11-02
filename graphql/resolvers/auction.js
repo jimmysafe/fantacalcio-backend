@@ -31,13 +31,18 @@ const auctionResolver = {
                     owner: user,
                     turnOf: user,
                     bidPlayer: null,
-                    bids: []
+                    bids: [],
+                    userCredits: 500
                 })
 
                 newAuction.users.push(user)
                 const savedAuction = await newAuction.save()
 
                 user.auctions.push(savedAuction)
+                user.credits.push({
+                    amount: savedAuction.userCredits,
+                    auction: savedAuction
+                })
                 await user.save()
 
                 return savedAuction
@@ -129,13 +134,16 @@ const auctionResolver = {
 
                 user.players.push({
                     player,
-                    auctionId: args.auctionId,
+                    auction,
                     amount_paid: highestBid.bid
                 })
 
+                // ----- Decrease credits amount
+                const creditsIndex = user.credits.map(obj => obj.auction._id).indexOf(args.auctionId)
+                user.credits[creditsIndex].amount = user.credits[creditsIndex].amount - highestBid.bid
+
                 await user.save()
 
-                // ----- TODO: decrease user credits
                 // ----- next turn handler
 
                 const maxIndex = auction.users.length - 1

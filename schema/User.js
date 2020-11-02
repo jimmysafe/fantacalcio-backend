@@ -24,12 +24,20 @@ const UserSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'player'
         },
-        auctionId: {
-            type: String
+        auction: {
+            type: Schema.Types.ObjectId,
+            ref: 'auction'
         },
         amount_paid: {
             type: Number
         }   
+    }],
+    credits: [{
+        amount: Number,
+        auction: {
+            type: Schema.Types.ObjectId,
+            ref: 'auction'
+        }
     }],
     ready: Boolean
 })

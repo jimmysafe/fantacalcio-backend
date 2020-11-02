@@ -34,7 +34,9 @@ const AuctionSchema = new Schema({
             ref: 'user'  
         },
         bid: Number
-    }]
+    }],
+
+    userCredits: Number
 
 })
 

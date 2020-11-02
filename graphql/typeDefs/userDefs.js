@@ -6,13 +6,19 @@ module.exports = `
         password: String!
         email: String!
         players: [UserPlayers]
+        credits: [UserCredits]
         ready: Boolean
     }
 
     type UserPlayers {
         player: Player
-        auctionId: String
+        auction: Auction
         amount_paid: Int
+    }
+
+    type UserCredits {
+        amount: Int
+        auction: Auction
     }
 
     type AuthData {
@@ -32,7 +38,7 @@ module.exports = `
 
     extend type Query {
         users: [User]
-        auctionUsers(auction: String!): [User]
+        user(userId: ID!): User
     }
 
     extend type Mutation {

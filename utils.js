@@ -8,7 +8,9 @@ const auctionPopulate = [
 
 const userPopulate = [
     'auctions', 
-    'players.player'
+    'players.player',
+    'player.auction',
+    'credits.auction'
 ]
 
 module.exports = {

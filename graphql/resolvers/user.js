@@ -12,9 +12,9 @@ const userResolver = {
         return users
       },
 
-      auctionUsers: async(_, args) => {
-        const users = await User.find({ auction: args.auction }).populate(userPopulate)
-        return users
+      user: async(_, args) => {
+        const userr = await User.findOne({ _id: args.userId }).populate(userPopulate)
+        return userr
       }
     },
 
@@ -76,6 +76,10 @@ const userResolver = {
           
           user.ready = false
           user.auctions.push(auction)
+          user.credits.push({
+            amount: auction.userCredits,
+            auction
+        })
           await user.save()
 
           auction.users.push(user)

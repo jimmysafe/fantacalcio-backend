@@ -13,6 +13,7 @@ module.exports = `
         users: [User]
         bidPlayer: Player
         bids: [Bid]
+        userCredits: Int
     }
 
     extend type Subscription {
