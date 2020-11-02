@@ -2,17 +2,18 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt")
 const User = require('../../schema/User')
 const Auction = require('../../schema/Auction')
+const { auctionPopulate, userPopulate } = require('../../utils')
 
 
 const userResolver = {
     Query: {
       users: async() => {
-        const users = await User.find().populate('auctions')
+        const users = await User.find().populate(userPopulate)
         return users
       },
 
       auctionUsers: async(_, args) => {
-        const users = await User.find({ auction: args.auction }).populate('auctions')
+        const users = await User.find({ auction: args.auction }).populate(userPopulate)
         return users
       }
     },
@@ -67,10 +68,10 @@ const userResolver = {
 
       associateUserToAuction: async(_, args, { pubsub }) => {
         try {
-          const auction = await Auction.findOne({ name: args.inviteCode }).populate(['owner', 'users', 'turnOf'])
+          const auction = await Auction.findOne({ name: args.inviteCode }).populate(auctionPopulate)
           if(!auction) throw new Error('Asta non trovata.')
 
-          const user = await User.findOne({ _id: args.userId }).populate('auctions')
+          const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
           if(!user) throw new Error('Utente non trovato.')
           
           user.ready = false
@@ -91,8 +92,8 @@ const userResolver = {
 
       changeUserReadiness: async(_, args, { pubsub }) => {
         try {
-          const auction = await Auction.findOne({ name: args.auctionName }).populate(['users'])
-          const user = await User.findOne({ _id: args.userId })
+          const auction = await Auction.findOne({ name: args.auctionName }).populate(auctionPopulate)
+          const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
           
           const userIndex = auction.users.findIndex(x => x._id !== user._id)
 
@@ -120,7 +121,7 @@ const userResolver = {
     Subscription: {
       auctionUsers: {
         subscribe: async(_, args, { pubsub }) =>  {
-          const auction = await Auction.findOne({ name: args.auction }).populate(['users'])
+          const auction = await Auction.findOne({ name: args.auction }).populate(auctionPopulate)
           setTimeout(() => pubsub.publish(`users_${args.auction}`, { auctionUsers: auction.users }), 0)
           return pubsub.asyncIterator(`users_${args.auction}`)
         }

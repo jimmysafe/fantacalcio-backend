@@ -5,7 +5,14 @@ module.exports = `
         nickName: String!
         password: String!
         email: String!
+        players: [UserPlayers]
         ready: Boolean
+    }
+
+    type UserPlayers {
+        player: Player
+        auctionId: String
+        amount_paid: Int
     }
 
     type AuthData {

@@ -19,6 +19,18 @@ const UserSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'auction'
     }],
+    players: [{
+        player: {
+            type: Schema.Types.ObjectId,
+            ref: 'player'
+        },
+        auctionId: {
+            type: String
+        },
+        amount_paid: {
+            type: Number
+        }   
+    }],
     ready: Boolean
 })
 

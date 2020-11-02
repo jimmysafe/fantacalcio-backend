@@ -22,7 +22,19 @@ const AuctionSchema = new Schema({
     turnOf: {
         type: Schema.Types.ObjectId,
         ref: 'user'    
-    }
+    },
+    bidPlayer: {
+        type: Schema.Types.ObjectId,
+        ref: 'player'    
+    },
+
+    bids: [{
+        from: {
+            type: Schema.Types.ObjectId,
+            ref: 'user'  
+        },
+        bid: Number
+    }]
 
 })
 
