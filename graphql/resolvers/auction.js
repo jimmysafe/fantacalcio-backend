@@ -4,7 +4,6 @@ const Player = require('../../schema/Player')
 const { uniqueNamesGenerator, adjectives, colors } = require('unique-names-generator');
 const { auctionPopulate, userPopulate } = require('../../utils')
 
-
 const auctionResolver = {
     Query: {
         auctions: async() => {
@@ -32,7 +31,8 @@ const auctionResolver = {
                     turnOf: user,
                     bidPlayer: null,
                     bids: [],
-                    userCredits: 500
+                    userCredits: 500,
+                    timer: false
                 })
 
                 newAuction.users.push(user)
@@ -70,6 +70,7 @@ const auctionResolver = {
                 const auction = await Auction.findOne({ _id: args.auctionId }).populate(auctionPopulate)
                 const user = await User.findOne({ _id: args.userId })
                 auction.turnOf = user
+                auction.timer = false
                 await auction.save()
                 pubsub.publish(`auction_${auction.name}`, { auction })
                 return auction
@@ -87,6 +88,7 @@ const auctionResolver = {
                 if(!auction) throw new Error("Auction not found")
 
                 auction.bidPlayer = player
+                auction.timer = false
                 await auction.save()
 
                 pubsub.publish(`auction_${auction.name}`, { auction })
@@ -102,13 +104,14 @@ const auctionResolver = {
             try {
                 const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
                 const auction = await Auction.findOne({ _id: args.auctionId }).populate(auctionPopulate)
-
+            
                 const newBid = {
                     from: user,
                     bid: args.bidAmount
                 }
 
                 auction.bids.push(newBid)
+                auction.timer = true
                 await auction.save()
 
                 pubsub.publish(`auction_${auction.name}`, { auction })
@@ -162,6 +165,7 @@ const auctionResolver = {
                 auction.bids = []
                 auction.bidPlayer = null
                 auction.turnOf = nextUserInLine
+                auction.timer = false
 
                 await auction.save()
 

@@ -9,6 +9,7 @@ const typeDefs = require('./graphql/typeDefs')
 const resolvers = require("./graphql/resolvers");
 
 const pubsub = new PubSub() 
+pubsub.ee.setMaxListeners(30)
 
 const server = new ApolloServer({ 
     typeDefs, 

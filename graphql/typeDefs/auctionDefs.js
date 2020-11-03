@@ -14,6 +14,7 @@ module.exports = `
         bidPlayer: Player
         bids: [Bid]
         userCredits: Int
+        timer: Boolean
     }
 
     extend type Subscription {
