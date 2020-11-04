@@ -9,9 +9,13 @@ module.exports = `
 
     extend type Query {
         players: [Player]
+        goalkeepers: [Player]
+        defenders: [Player]
+        midfielders: [Player]
+        strikers: [Player]
     }
 
     extend type Mutation {
-        createPlayer(name: String!, role: String!, team: String!): Player
+        addAllSeasonPlayers: String!
     }
 `

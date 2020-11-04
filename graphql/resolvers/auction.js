@@ -119,6 +119,7 @@ const auctionResolver = {
                 return newBid
 
             } catch(err) {
+                console.log(err)
                 throw err
             }
         },
@@ -174,6 +175,7 @@ const auctionResolver = {
                 return auction
 
             } catch(err) {
+                console.log(err)
                 throw err
             }
         },
