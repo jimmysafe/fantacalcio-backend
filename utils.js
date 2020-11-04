@@ -1,16 +1,33 @@
 const auctionPopulate = [
     'owner', 
-    'users', 
     'turnOf', 
     'bidPlayer', 
-    'bids.from'
+    'bids.from',
+    {
+        path: 'users',
+        populate: {
+          path: 'players.player'
+        } 
+    },
+    {
+        path: 'users',
+        populate: {
+          path: 'players.auction'
+        } 
+    },
+    {
+        path: 'users',
+        populate: {
+          path: 'credits.auction'
+        } 
+    },
 ]
 
 const userPopulate = [
     'auctions', 
     'players.player',
-    'player.auction',
-    'credits.auction'
+    'players.player.auction',
+    'credits.auction',
 ]
 
 module.exports = {

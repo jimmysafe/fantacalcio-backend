@@ -1,7 +1,7 @@
 module.exports = `
     type Player {
         _id: ID!
-        name: String!
+        name: String
         role: String!
         team: String!
         paid: Int
