@@ -17,6 +17,13 @@ module.exports = `
         timer: Boolean
     }
 
+    type PlayerAllocations {
+        P: Boolean,
+        D: Boolean,
+        C: Boolean,
+        A: Boolean
+    }
+
     extend type Subscription {
         auction(auction: String!): Auction
     }
@@ -24,6 +31,7 @@ module.exports = `
     extend type Query {
         auctions: [Auction]
         auction(auctionName: String!): Auction
+        auctionUserPlayersAllocation(auctionId: ID!): PlayerAllocations
     }
 
     extend type Mutation {

@@ -14,6 +14,54 @@ const auctionResolver = {
         auction: async(_, args) => {
             const auction = await Auction.findOne({ name: args.auctionName }).populate(auctionPopulate)
             return auction
+        },
+
+        auctionUserPlayersAllocation: async(_, args) => {
+            try {
+                const auction = await Auction.findOne({ _id: args.auctionId }).populate(auctionPopulate)
+
+                const auctionUsers = auction.users
+
+                let P = []
+                let D = []
+                let C = []
+                let A = []
+
+                auctionUsers.forEach(user => {
+                    const userP = user.players.filter(player => player.player.role === 'P')
+                    const userD = user.players.filter(player => player.player.role === 'D')
+                    const userC = user.players.filter(player => player.player.role === 'C')
+                    const userA = user.players.filter(player => player.player.role === 'A')
+
+                    if(userP.length < 3) P.push(false)
+                    else P.push(true)
+
+                    if(userD.length < 8) D.push(false)
+                    else D.push(true)
+
+                    if(userC.length < 8) C.push(false)
+                    else C.push(true)
+
+                    if(userA.length < 6) A.push(false)
+                    else A.push(true)
+                })
+
+                const D_COMPLETE = D.filter(d => d === false)
+                const P_COMPLETE = P.filter(p => p === false)
+                const C_COMPLETE = C.filter(c => c === false)
+                const A_COMPLETE = A.filter(a => a === false)
+                
+                return {
+                    P: !P_COMPLETE.length,
+                    D: !D_COMPLETE.length,
+                    C: !C_COMPLETE.length,
+                    A: !A_COMPLETE.length
+                }
+
+            } catch(err) {
+                console.log(err)
+                throw err
+            }
         }
     },
 
