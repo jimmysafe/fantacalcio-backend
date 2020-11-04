@@ -35,9 +35,12 @@ const AuctionSchema = new Schema({
         },
         bid: Number
     }],
-    timer: Boolean,
-    userCredits: Number
 
+    chosenPlayers: [String],
+
+    timer: Boolean,
+    
+    userCredits: Number
 })
 
 

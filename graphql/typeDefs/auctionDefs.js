@@ -15,6 +15,7 @@ module.exports = `
         bids: [Bid]
         userCredits: Int
         timer: Boolean
+        chosenPlayers: [String!]
     }
 
     type PlayerAllocations {

@@ -85,7 +85,7 @@ const userResolver = {
           auction.users.push(user)
           await auction.save()
 
-          pubsub.publish(`users_${auction.name}`, { auctionUsers: auction.users })
+          pubsub.publish(`auction_${auction.name}`, { auction })
 
           return auction
 
@@ -99,7 +99,9 @@ const userResolver = {
           const auction = await Auction.findOne({ name: args.auctionName }).populate(auctionPopulate)
           const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
           
-          const userIndex = auction.users.findIndex(x => x._id !== user._id)
+          // const userIndex = auction.users.findIndex(x => x._id !== user._id)
+
+          const userIndex = auction.users.map(x => x._id).indexOf(user._id)
 
           user.ready = !user.ready
           const savedUser = await user.save()
@@ -107,7 +109,7 @@ const userResolver = {
           auction.users[userIndex].ready = savedUser.ready
           await auction.save()
 
-          pubsub.publish(`users_${auction.name}`, { auctionUsers: auction.users })
+          pubsub.publish(`auction_${auction.name}`, { auction })
           
           return savedUser
 

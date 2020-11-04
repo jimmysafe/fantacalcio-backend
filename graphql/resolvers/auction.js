@@ -136,6 +136,7 @@ const auctionResolver = {
                 if(!auction) throw new Error("Auction not found")
 
                 auction.bidPlayer = player
+                auction.chosenPlayers.push(player._id)
                 auction.timer = false
                 await auction.save()
 
