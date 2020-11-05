@@ -5,7 +5,6 @@ module.exports = `
         nickName: String!
         password: String!
         email: String!
-        players: [UserPlayers]
         credits: [UserCredits]
         ready: Boolean
     }
@@ -45,7 +44,7 @@ module.exports = `
         createUser(input: RegisterUserInput!): User
         loginUser(email: String!, password: String!): AuthData
         associateUserToAuction(userId: ID!, inviteCode: String!): Auction
-        changeUserReadiness(userId: ID!, auctionName: String!) : User
+        changeUserReadiness(userId: ID!, auctionName: String!) : Auction
         deleteAllUsers: String
     }
 `

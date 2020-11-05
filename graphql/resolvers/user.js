@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt")
 const User = require('../../schema/User')
 const Auction = require('../../schema/Auction')
-const { auctionPopulate, userPopulate } = require('../../utils')
+const { auctionPopulate, userPopulate } = require('../../utils');
+const { AuthenticationError } = require('apollo-server');
 
 
 const userResolver = {
@@ -13,8 +14,8 @@ const userResolver = {
       },
 
       user: async(_, args) => {
-        const userr = await User.findOne({ _id: args.userId }).populate(userPopulate)
-        return userr
+        const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
+        return user
       }
     },
 
@@ -54,7 +55,7 @@ const userResolver = {
           
           if(!passwordMatch) throw new Error('Email o Password errati.')
 
-          const token = jwt.sign({ userId: user._id, email: user.email }, 'somesupersecretkey', { expiresIn: '10h' })
+          const token = jwt.sign({ userId: user._id, email: user.email }, 'somesupersecretkey', { expiresIn: '1d' })
 
           return { 
             userId: user.id, 
@@ -74,15 +75,18 @@ const userResolver = {
           const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
           if(!user) throw new Error('Utente non trovato.')
           
-          user.ready = false
           user.auctions.push(auction)
-          user.credits.push({
-            amount: auction.userCredits,
-            auction
-        })
+
           await user.save()
 
-          auction.users.push(user)
+          auction.users.push({
+            _id: user._id,
+            nickName: user.nickName,
+            players: [],
+            credits: 500,
+            ready: false
+          })
+
           await auction.save()
 
           pubsub.publish(`auction_${auction.name}`, { auction })
@@ -97,21 +101,16 @@ const userResolver = {
       changeUserReadiness: async(_, args, { pubsub }) => {
         try {
           const auction = await Auction.findOne({ name: args.auctionName }).populate(auctionPopulate)
-          const user = await User.findOne({ _id: args.userId }).populate(userPopulate)
           
-          // const userIndex = auction.users.findIndex(x => x._id !== user._id)
+          const userIndex = auction.users.map(x => x._id).indexOf(args.userId)
 
-          const userIndex = auction.users.map(x => x._id).indexOf(user._id)
 
-          user.ready = !user.ready
-          const savedUser = await user.save()
-
-          auction.users[userIndex].ready = savedUser.ready
+          auction.users[userIndex].ready = !auction.users[userIndex].ready
           await auction.save()
 
           pubsub.publish(`auction_${auction.name}`, { auction })
           
-          return savedUser
+          return auction
 
         } catch(err) {
           throw err

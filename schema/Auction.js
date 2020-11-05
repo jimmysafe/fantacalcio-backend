@@ -16,8 +16,23 @@ const AuctionSchema = new Schema({
         ref: 'user'
     },
     users: [{
-        type: Schema.Types.ObjectId,
-        ref: 'user'
+        nickName: {
+            type: String,
+            required: true
+        },
+        players : [{
+            player: {
+                type: Schema.Types.ObjectId,
+                ref: 'player'
+            },
+            amount_paid: {
+                type: Number,
+                required: true
+            }
+        }
+    ],
+        credits: Number,
+        ready: Boolean
     }],
     turnOf: {
         type: Schema.Types.ObjectId,

@@ -4,6 +4,7 @@ const Player = require('../../schema/Player')
 const { uniqueNamesGenerator, adjectives, colors } = require('unique-names-generator');
 const { auctionPopulate, userPopulate } = require('../../utils')
 
+
 const auctionResolver = {
     Query: {
         auctions: async() => {
@@ -83,14 +84,17 @@ const auctionResolver = {
                     timer: false
                 })
 
-                newAuction.users.push(user)
-                const savedAuction = await newAuction.save()
-
-                user.auctions.push(savedAuction)
-                user.credits.push({
-                    amount: savedAuction.userCredits,
-                    auction: savedAuction
+                newAuction.users.push({
+                    _id: user._id,
+                    nickName: user.nickName,
+                    players: [],
+                    credits: 500,
+                    ready: false
                 })
+
+                const savedAuction = await newAuction.save()
+                user.auctions.push(savedAuction)
+
                 await user.save()
 
                 return savedAuction
@@ -106,6 +110,7 @@ const auctionResolver = {
                 const auction = await Auction.findOne({ _id: args.auctionId }).populate(auctionPopulate)
                 auction.status = args.newStatus
                 await auction.save()
+
                 pubsub.publish(`auction_${auction.name}`, { auction })
                 return auction
             } catch(err) {
@@ -120,6 +125,7 @@ const auctionResolver = {
                 auction.turnOf = user
                 auction.timer = false
                 await auction.save()
+
                 pubsub.publish(`auction_${auction.name}`, { auction })
                 return auction
 
@@ -183,19 +189,19 @@ const auctionResolver = {
                 })
 
                 const userId = highestBid.from._id
-                const user = await User.findOne({ _id: userId }).populate(userPopulate)
 
-                user.players.push({
+                const userIndex = auction.users.map(user => user._id).indexOf(userId)
+
+                // ----- Add player to user 'players' array
+                auction.users[userIndex].players.push({
                     player,
-                    auction,
                     amount_paid: highestBid.bid
                 })
 
-                // ----- Decrease credits amount
-                const creditsIndex = user.credits.map(obj => obj.auction._id).indexOf(args.auctionId)
-                user.credits[creditsIndex].amount = user.credits[creditsIndex].amount - highestBid.bid
 
-                await user.save()
+                // ----- Decrease credits amount
+                auction.users[userIndex].credits = auction.users[userIndex].credits - highestBid.bid
+
 
                 // ----- next turn handler
 
@@ -212,13 +218,14 @@ const auctionResolver = {
 
                 const nextUserInLine = auction.users[nextInline]
 
+                
+                auction.turnOf = nextUserInLine
                 auction.bids = []
                 auction.bidPlayer = null
-                auction.turnOf = nextUserInLine
                 auction.timer = false
 
                 await auction.save()
-
+                
                 pubsub.publish(`auction_${auction.name}`, { auction })
       
                 return auction
@@ -239,6 +246,7 @@ const auctionResolver = {
         auction: {
             subscribe: async(_, args, { pubsub }) => {
                 const auction = await Auction.findOne({ name: args.auction }).populate(auctionPopulate)
+                                
                 setTimeout(() => pubsub.publish(`auction_${args.auction}`, { auction }), 0)
                 return pubsub.asyncIterator(`auction_${args.auction}`)
             }

@@ -18,28 +18,7 @@ const UserSchema = new Schema({
     auctions: [{
         type: Schema.Types.ObjectId,
         ref: 'auction'
-    }],
-    players: [{
-        player: {
-            type: Schema.Types.ObjectId,
-            ref: 'player'
-        },
-        auction: {
-            type: Schema.Types.ObjectId,
-            ref: 'auction'
-        },
-        amount_paid: {
-            type: Number
-        }   
-    }],
-    credits: [{
-        amount: Number,
-        auction: {
-            type: Schema.Types.ObjectId,
-            ref: 'auction'
-        }
-    }],
-    ready: Boolean
+    }]
 })
 
 

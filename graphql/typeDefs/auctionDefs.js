@@ -4,13 +4,26 @@ module.exports = `
         bid: Int!
     }
 
+    type AuctionUserPlayers {
+        player: Player!
+        amount_paid: Int!
+    }
+
+    type AuctionUser {
+        _id: ID!
+        nickName: String!
+        players: [AuctionUserPlayers]
+        ready: Boolean
+        credits: Int
+    }
+
     type Auction {
         _id: ID!
         name: String!
         status: String!
         owner: User
         turnOf: User
-        users: [User]
+        users: [AuctionUser]
         bidPlayer: Player
         bids: [Bid]
         userCredits: Int
