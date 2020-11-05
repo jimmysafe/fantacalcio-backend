@@ -3,6 +3,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const AuctionSchema = new Schema({
+    nickName: {
+        type: String,
+        required: true
+    },
     name: {
         type: String,
         required: true
@@ -50,6 +54,13 @@ const AuctionSchema = new Schema({
         },
         bid: Number
     }],
+
+    rules: {
+        goalkeepers: Number,
+        defenders: Number,
+        midfielders: Number,
+        strikers: Number
+    },
 
     chosenPlayers: [String],
 

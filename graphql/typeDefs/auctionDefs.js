@@ -17,8 +17,16 @@ module.exports = `
         credits: Int
     }
 
+    type AuctionRules {
+        goalkeepers: Int!
+        defenders: Int!
+        midfielders: Int!
+        strikers: Int!
+    }
+
     type Auction {
         _id: ID!
+        nickName: String!
         name: String!
         status: String!
         owner: User
@@ -29,13 +37,20 @@ module.exports = `
         userCredits: Int
         timer: Boolean
         chosenPlayers: [String!]
+        rules: AuctionRules!
     }
 
-    type PlayerAllocations {
-        P: Boolean,
-        D: Boolean,
-        C: Boolean,
-        A: Boolean
+    input AuctionCreate {
+        userId: ID!
+        nickName: String!
+        rules: AuctionRulesInput!
+    }
+
+    input AuctionRulesInput {
+        goalkeepers: Int!,
+        defenders: Int!,
+        midfielders: Int!,
+        strikers: Int!
     }
 
     extend type Subscription {
@@ -45,11 +60,10 @@ module.exports = `
     extend type Query {
         auctions: [Auction]
         auction(auctionName: String!): Auction
-        auctionUserPlayersAllocation(auctionId: ID!): PlayerAllocations
     }
 
     extend type Mutation {
-        createAuction(userId: ID!): Auction
+        createAuction(input: AuctionCreate!): Auction
         createBid(auctionId: ID!, userId: ID!, bidAmount: Int!): Bid
         updateAuctionStatus(auctionId: ID!, newStatus: String!): Auction
         updateAuctionUserTurn(auctionId: ID!, userId: ID!): Auction
