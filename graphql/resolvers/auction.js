@@ -157,6 +157,22 @@ const auctionResolver = {
                 auction.users[userIndex].credits = auction.users[userIndex].credits - highestBid.bid
 
 
+                // ------ Check if Auction is complete
+                // if all users have 0 credits, close auction
+                const usersCredits = auction.users.find(user => user.credits > 0)
+                if(!usersCredits){
+                    auction.status = 'complete'
+                }
+
+                // if all users have max number of players, close auction
+                const { goalkeepers, defenders, midfielders, strikers } = auction.rules
+                const maxAuctionPlayers = goalkeepers + defenders + midfielders + strikers
+
+                const userStillPlaying = auction.users.find(user => user.players.length < maxAuctionPlayers)
+                if(!userStillPlaying){
+                    auction.status = 'complete'
+                }
+                
                 // ----- next turn handler
 
                 const maxIndex = auction.users.length - 1
